@@ -10,7 +10,7 @@ def _to_lunar_hour(hour: int) -> int:
 def convert_lunar_time():
     now = pd.to_datetime('today')
     lunar_date = LunarDate.fromSolarDate(now.year, now.month, now.day)
-    lunar_hour = _to_lunar_hour(now.hour)+8
+    lunar_hour = _to_lunar_hour(now.hour)
 
     hour_dict = {
         1: "子时", 2: "丑时", 3: "寅时", 4: "卯时",
