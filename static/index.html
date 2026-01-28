@@ -1,32 +1,140 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>小六壬</title>
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>小六壬</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --primary: #1c1c1e;
+      --accent: #8b0000;
+      --muted: #6e6e73;
+    }
+
+    body {
+      margin: 0;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+                   "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin: 32px 0 24px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      letter-spacing: 4px;
+      margin: 0;
+    }
+
+    header p {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .time {
+      text-align: center;
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .result {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+
+    .arrow {
+      color: var(--accent);
+      padding: 0 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: none;
+      font-size: 18px;
+      font-weight: 600;
+      background: var(--primary);
+      color: white;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 24px;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 30px;">
 
-<h1>小六壬</h1>
+<body>
+  <div class="container">
+    <header>
+      <h1>小六壬</h1>
+      <p>以时起卦 · 随心而断</p>
+    </header>
 
-<button onclick="run()">起卦</button>
+    <div class="card">
+      <div id="time" class="time">点击下方按钮起卦</div>
+      <div id="result" class="result">—</div>
+    </div>
 
-<p id="time"></p>
-<h2 id="result"></h2>
+    <button onclick="run()">起卦</button>
 
-<script>
-async function run() {
-    const res = await fetch("/api/xiaoliuren");
-    const data = await res.json();
+    <footer>
+      心诚则灵 · 仅供参考
+    </footer>
+  </div>
 
-    document.getElementById("time").innerText =
-        `农历 ${data.lunar_month} 月 ${data.lunar_day} 日 ${data.shichen}`;
+  <script>
+    async function run() {
+      const res = await fetch("/api/xiaoliuren");
+      const data = await res.json();
 
-    document.getElementById("result").innerText =
-        data.result.join(" → ");
-}
-</script>
+      document.getElementById("time").innerText =
+        `农历 ${data.lunar_month} 月 ${data.lunar_day} 日 · ${data.shichen}`;
 
+      document.getElementById("result").innerHTML =
+        data.result.join('<span class="arrow">→</span>');
+    }
+  </script>
 </body>
 </html>
