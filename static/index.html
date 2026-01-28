@@ -9,24 +9,23 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <style>
     :root {
-      --bg: #f6f7f9;
-      --card: #ffffff;
-      --primary: #1c1c1e;
-      --accent: #8b0000;
-      --muted: #6e6e73;
+      --paper: #f9f7f3;
+      --ink: #1f1f1f;
+      --muted: #6b6b6b;
+      --seal: #8b1e1e;
+      --line: rgba(0,0,0,0.08);
     }
 
     body {
       margin: 0;
-      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-      background: var(--bg);
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-                   "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      color: var(--primary);
+      padding: env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Songti SC", "STSong", "PingFang SC",
+                   "Hiragino Mincho ProN", serif;
     }
 
     .container {
@@ -36,71 +35,94 @@
 
     header {
       text-align: center;
-      margin: 32px 0 24px;
+      margin-top: 40px;
+      margin-bottom: 32px;
     }
 
     header h1 {
-      font-size: 28px;
-      letter-spacing: 4px;
+      font-size: 30px;
+      letter-spacing: 6px;
       margin: 0;
     }
 
-    header p {
-      color: var(--muted);
-      margin-top: 8px;
+    header .subtitle {
+      margin-top: 10px;
       font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 2px;
     }
 
     .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 26px 22px;
+      background: rgba(255,255,255,0.6);
+      margin-bottom: 26px;
     }
 
     .time {
       text-align: center;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--muted);
-      margin-bottom: 12px;
+      margin-bottom: 18px;
     }
 
     .result {
       text-align: center;
       font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 2px;
+      letter-spacing: 6px;
+      font-weight: 500;
     }
 
     .arrow {
-      color: var(--accent);
+      color: var(--seal);
       padding: 0 6px;
     }
 
+    .btn-wrap {
+      display: flex;
+      justify-content: center;
+    }
+
     button {
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      border: none;
+      background: transparent;
+      border: 1.5px solid var(--ink);
+      padding: 14px 36px;
       font-size: 18px;
-      font-weight: 600;
-      background: var(--primary);
-      color: white;
-      margin-top: 12px;
+      letter-spacing: 6px;
+      border-radius: 999px;
       cursor: pointer;
+      position: relative;
+    }
+
+    button::after {
+      content: "印";
+      position: absolute;
+      right: -14px;
+      bottom: -14px;
+      width: 28px;
+      height: 28px;
+      background: var(--seal);
+      color: white;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transform: rotate(-8deg);
     }
 
     button:active {
-      transform: scale(0.98);
-      opacity: 0.9;
+      transform: scale(0.97);
+      opacity: 0.85;
     }
 
     footer {
+      margin-top: 36px;
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      margin-top: 24px;
+      letter-spacing: 1px;
     }
   </style>
 </head>
@@ -109,18 +131,20 @@
   <div class="container">
     <header>
       <h1>小六壬</h1>
-      <p>以时起卦 · 随心而断</p>
+      <div class="subtitle">以时起卦 · 顺势而断</div>
     </header>
 
     <div class="card">
-      <div id="time" class="time">点击下方按钮起卦</div>
+      <div id="time" class="time">未起卦</div>
       <div id="result" class="result">—</div>
     </div>
 
-    <button onclick="run()">起卦</button>
+    <div class="btn-wrap">
+      <button onclick="run()">起 卦</button>
+    </div>
 
     <footer>
-      心诚则灵 · 仅供参考
+      心诚则灵 · 仅供参悟
     </footer>
   </div>
 
