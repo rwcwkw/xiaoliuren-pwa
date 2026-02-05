@@ -1,5 +1,6 @@
 import pandas as pd
 from lunardate import LunarDate
+from datetime import timedelta
 
 def _to_lunar_hour(hour: int) -> int:
     if hour in (0, 23):
@@ -10,6 +11,8 @@ def _to_lunar_hour(hour: int) -> int:
 def convert_lunar_time():
     now = pd.to_datetime('today')
     lunar_date = LunarDate.fromSolarDate(now.year, now.month, now.day)
+    if now.hour == 23:
+        lunar_date = lunar_date+timedelta(1)
     lunar_hour = _to_lunar_hour(now.hour) + 4
 
     hour_dict = {
