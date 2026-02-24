@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小六壬</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>小六壬</title>
+    <link rel="manifest" href="manifest.json">
 </head>
-<body>
+<body style="font-family: sans-serif; text-align: center; padding: 30px;">
+
+<h1>小六壬</h1>
+
+<button onclick="run()">起卦</button>
+
+<p id="time"></p>
+<h2 id="result"></h2>
+
+<script>
+async function run() {
+    const res = await fetch("/api/xiaoliuren");
+    const data = await res.json();
+
+    document.getElementById("time").innerText =
+        `农历 ${data.lunar_month} 月 ${data.lunar_day} 日 ${data.shichen}`;
+
+    document.getElementById("result").innerText =
+        data.result.join(" → ");
+}
+</script>
+
 </body>
 </html>
