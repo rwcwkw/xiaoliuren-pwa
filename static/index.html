@@ -1,32 +1,421 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>小六壬</title>
-    <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>小六壬 · 书卷</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment:   #f2e4c4;
+            --parchment2:  #e8d5a8;
+            --parchment3:  #d4bc88;
+            --ink:         #2c1a0e;
+            --ink-soft:    #5c3d20;
+            --vermillion:  #c0392b;
+            --verm-faint:  rgba(192,57,43,0.12);
+            --seal-red:    #8b1a1a;
+            --gold:        #8b6914;
+            --gold-light:  #b8902a;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--parchment);
+            min-height: 100vh;
+            font-family: 'Noto Serif SC', serif;
+            color: var(--ink);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Paper grain */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0;
+        }
+
+        /* Vertical ruled lines like manuscript paper */
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 47px,
+                rgba(139,105,20,0.1) 47px,
+                rgba(139,105,20,0.1) 48px
+            );
+            pointer-events: none; z-index: 0;
+        }
+
+        .page {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 400px;
+            padding: 0 0 80px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* ── Scroll roller top ── */
+        .scroll-roller {
+            width: 100%;
+            height: 28px;
+            background: linear-gradient(180deg, #5c3d20 0%, #8b6340 40%, #6b4820 100%);
+            border-bottom: 3px solid #3a2210;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(44,26,14,0.35);
+        }
+
+        .scroll-roller::before, .scroll-roller::after {
+            content: '';
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 20px; height: 20px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #c8a060, #5c3a18);
+            border: 2px solid #3a2210;
+        }
+        .scroll-roller::before { left: 10px; }
+        .scroll-roller::after  { right: 10px; }
+
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            padding: 40px 24px 28px;
+            border-bottom: 1px solid var(--parchment3);
+            width: 100%;
+            position: relative;
+            animation: fadeDown 0.9s ease both;
+        }
+
+
+
+        h1 {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 4rem;
+            color: var(--ink);
+            letter-spacing: 0.4em;
+            padding-right: 0.4em;
+            line-height: 1;
+            text-shadow: 2px 3px 0 rgba(44,26,14,0.15);
+        }
+
+        .header-meta {
+            margin-top: 10px;
+            font-size: 0.68rem;
+            letter-spacing: 0.3em;
+            color: var(--ink-soft);
+            opacity: 0.6;
+        }
+
+        /* ── Brushstroke divider ── */
+        .brush-divider {
+            width: 80%;
+            height: 6px;
+            margin: 0 auto;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 6'%3E%3Cpath d='M0 3 Q20 1 40 3 Q60 5 80 3 Q100 1 120 3 Q140 5 160 3 Q180 1 200 3' stroke='%232c1a0e' stroke-width='1.5' fill='none' opacity='0.35'/%3E%3C/svg%3E") repeat-x center;
+            opacity: 0.5;
+        }
+
+        /* ── Body area ── */
+        .scroll-body {
+            width: 100%;
+            padding: 32px 28px;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0;
+        }
+
+        /* ── Cast button ── */
+        .btn-wrap { animation: fadeUp 0.8s 0.2s ease both; margin-bottom: 8px; }
+
+        button {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 1.6rem;
+            letter-spacing: 0.4em;
+            padding-right: 0.4em;
+            color: var(--parchment);
+            background: var(--vermillion);
+            border: none;
+            padding: 13px 42px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0 var(--ink), 0 6px 20px rgba(192,57,43,0.3);
+        }
+
+        button::before {
+            content: '';
+            position: absolute; inset: -3px;
+            border: 1px solid rgba(139,105,20,0.5);
+            pointer-events: none;
+        }
+
+        button:hover { background: #d44232; transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink), 0 8px 24px rgba(192,57,43,0.4); }
+        button:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+        button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        /* ── Time ── */
+        .time-display {
+            margin-top: 22px;
+            font-size: 0.82rem;
+            letter-spacing: 0.25em;
+            color: var(--ink-soft);
+            opacity: 0;
+            transition: opacity 0.5s;
+            text-align: center;
+            min-height: 1.3em;
+        }
+        .time-display.visible { opacity: 0.7; }
+
+        /* ── Loading ── */
+        .loading { display: none; flex-direction: column; align-items: center; gap: 18px; margin-top: 44px; }
+        .loading.visible { display: flex; }
+
+        .brush-dots {
+            display: flex; gap: 10px;
+        }
+
+        .brush-dot {
+            width: 10px; height: 10px;
+            background: var(--ink);
+            border-radius: 50% 40% 50% 40%;
+            animation: brushPulse 1.2s ease-in-out infinite;
+            opacity: 0.6;
+        }
+        .brush-dot:nth-child(2) { animation-delay: 0.2s; border-radius: 40% 50% 40% 50%; }
+        .brush-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes brushPulse {
+            0%,100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(0.5); opacity: 0.2; }
+        }
+
+        .loading-text { font-size: 0.75rem; letter-spacing: 0.4em; color: var(--ink-soft); opacity: 0.55; }
+
+        /* ── Error ── */
+        .error-msg { display: none; margin-top: 32px; font-size: 0.82rem; color: var(--vermillion); letter-spacing: 0.1em; text-align: center; padding: 10px 18px; border: 1px solid rgba(192,57,43,0.3); }
+        .error-msg.visible { display: block; }
+
+        /* ── Result ── */
+        .result-panel { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 32px; }
+        .result-panel.visible { display: flex; animation: fadeUp 0.6s ease both; }
+
+        /* Column dividers like traditional text columns */
+        .col-section {
+            display: flex;
+            width: 100%;
+            border: 1px solid var(--parchment3);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .col-section::before {
+            content: '';
+            position: absolute; inset: 4px;
+            border: 1px solid rgba(139,105,20,0.2);
+            pointer-events: none;
+        }
+
+        .col {
+            flex: 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 22px 8px 18px;
+            border-right: 1px solid var(--parchment3);
+            position: relative;
+        }
+        .col:last-child { border-right: none; }
+
+        .col-label {
+            font-size: 0.6rem; letter-spacing: 0.3em;
+            color: var(--gold); opacity: 0.7; margin-bottom: 14px;
+        }
+
+        .col-name {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2.4rem; line-height: 1;
+            margin-bottom: 10px; letter-spacing: 0.05em;
+        }
+
+        .col-name.auspicious   { color: var(--vermillion); }
+        .col-name.neutral      { color: var(--gold); }
+        .col-name.inauspicious { color: var(--ink-soft); }
+
+        .col-kw { font-size: 0.58rem; color: var(--ink-soft); opacity: 0.55; text-align: center; line-height: 1.8; letter-spacing: 0.08em; }
+
+        /* Reading */
+        .reading-wrap {
+            width: 100%;
+            border: 1px solid var(--parchment3);
+            background: rgba(44,26,14,0.03);
+            padding: 20px 22px 22px;
+            position: relative;
+        }
+
+        .reading-wrap::before {
+            content: '';
+            position: absolute; inset: 5px;
+            border: 1px solid rgba(139,105,20,0.18);
+            pointer-events: none;
+        }
+
+        .reading-heading {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+        }
+        .reading-rule { flex: 1; height: 1px; background: var(--parchment3); }
+        .reading-char { font-family: 'Ma Shan Zheng', cursive; font-size: 0.85rem; letter-spacing: 0.3em; color: var(--gold); }
+
+        .reading-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+
+        .rtab {
+            font-family: 'Ma Shan Zheng', cursive; font-size: 0.8rem; letter-spacing: 0.2em;
+            padding: 5px 14px; border: 1px solid var(--parchment3);
+            background: transparent; cursor: pointer; color: var(--ink-soft); opacity: 0.5;
+            transition: all 0.2s;
+        }
+        .rtab.active { background: var(--vermillion); color: var(--parchment); border-color: var(--vermillion); opacity: 1; }
+
+        .rtab-content { display: none; }
+        .rtab-content.active { display: block; animation: fadeIn 0.3s ease both; }
+
+        .rtab-name { font-family: 'Ma Shan Zheng', cursive; font-size: 1.4rem; letter-spacing: 0.15em; margin-bottom: 8px; }
+        .rtab-name.auspicious   { color: var(--vermillion); }
+        .rtab-name.neutral      { color: var(--gold); }
+        .rtab-name.inauspicious { color: var(--ink-soft); }
+
+        .rtab-text { font-size: 0.78rem; line-height: 2.1; color: var(--ink-soft); letter-spacing: 0.06em; }
+
+        /* ── Scroll roller bottom ── */
+        .scroll-roller-bottom {
+            width: 100%;
+            height: 28px;
+            background: linear-gradient(0deg, #5c3d20 0%, #8b6340 40%, #6b4820 100%);
+            border-top: 3px solid #3a2210;
+            box-shadow: 0 -4px 12px rgba(44,26,14,0.35);
+            position: relative; margin-top: auto;
+        }
+        .scroll-roller-bottom::before, .scroll-roller-bottom::after {
+            content: '';
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 20px; height: 20px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #c8a060, #5c3a18);
+            border: 2px solid #3a2210;
+        }
+        .scroll-roller-bottom::before { left: 10px; }
+        .scroll-roller-bottom::after  { right: 10px; }
+
+        @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); }  to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+    </style>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 30px;">
+<body>
+<div class="page">
+    <div class="scroll-roller"></div>
 
-<h1>小六壬</h1>
+    <div class="header">
 
-<button onclick="run()">起卦</button>
+        <h1>小六壬</h1>
+        <div class="header-meta">推步问卦 · 依农历推算</div>
+    </div>
 
-<p id="time"></p>
-<h2 id="result"></h2>
+    <div class="scroll-body">
+        <div class="btn-wrap">
+            <button id="castBtn" onclick="run()">起　卦</button>
+        </div>
+
+        <div class="time-display" id="time"></div>
+
+        <div class="loading" id="loading">
+            <div class="brush-dots">
+                <div class="brush-dot"></div>
+                <div class="brush-dot"></div>
+                <div class="brush-dot"></div>
+            </div>
+            <div class="loading-text">卜筮中</div>
+        </div>
+
+        <div class="error-msg" id="error">⚠ 起卦失败，请稍后再试</div>
+
+        <div class="result-panel" id="result">
+            <div class="col-section" id="cols"></div>
+
+            <div class="reading-wrap">
+                <div class="reading-heading">
+                    <div class="reading-rule"></div>
+                    <span class="reading-char">卦　意</span>
+                    <div class="reading-rule"></div>
+                </div>
+                <div class="reading-tabs" id="rtabs"></div>
+                <div id="rtab-contents"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-roller-bottom"></div>
+</div>
 
 <script>
+const POSITIONS = ["月卦","日卦","时卦"];
+const LABELS = ["月","日","时"];
+
 async function run() {
-    const res = await fetch("/api/xiaoliuren");
-    const data = await res.json();
-
-    document.getElementById("time").innerText =
-        `农历 ${data.lunar_month} 月 ${data.lunar_day} 日 ${data.shichen}`;
-
-    document.getElementById("result").innerText =
-        data.result.join(" → ");
+    const btn=document.getElementById('castBtn'), loadEl=document.getElementById('loading'),
+          errEl=document.getElementById('error'), resEl=document.getElementById('result'),
+          timeEl=document.getElementById('time');
+    btn.disabled=true; errEl.classList.remove('visible'); resEl.classList.remove('visible');
+    timeEl.classList.remove('visible'); timeEl.textContent=''; loadEl.classList.add('visible');
+    try {
+        const res=await fetch('/api/xiaoliuren');
+        if(!res.ok) throw new Error();
+        const data=await res.json();
+        if(data.error) throw new Error(data.error);
+        loadEl.classList.remove('visible');
+        timeEl.textContent=`农历 ${data.lunar_month} 月 ${data.lunar_day} 日　${data.shichen}`;
+        timeEl.classList.add('visible');
+        buildCols(data.result); buildRTabs(data.result);
+        resEl.classList.add('visible');
+    } catch(e) {
+        loadEl.classList.remove('visible');
+        errEl.textContent=navigator.onLine?'⚠ 起卦失败，请稍后再试':'⚠ 当前离线，无法起卦';
+        errEl.classList.add('visible');
+    } finally { btn.disabled=false; }
 }
-</script>
 
+function buildCols(results) {
+    const el=document.getElementById('cols'); el.innerHTML='';
+    results.forEach((sign,i)=>{
+        const c=document.createElement('div'); c.className='col';
+        c.innerHTML=`<div class="col-label">${POSITIONS[i]}</div>
+            <div class="col-name ${sign.tone}">${sign.name}</div>
+            <div class="col-kw">${sign.keywords.replace(/·/g,'<br>')}</div>`;
+        el.appendChild(c);
+    });
+}
+
+function buildRTabs(results) {
+    const tabsEl=document.getElementById('rtabs'), conEl=document.getElementById('rtab-contents');
+    tabsEl.innerHTML=''; conEl.innerHTML='';
+    results.forEach((sign,i)=>{
+        const t=document.createElement('button'); t.className='rtab'+(i===2?' active':'');
+        t.textContent=LABELS[i]; t.onclick=()=>switchRTab(i); tabsEl.appendChild(t);
+        const c=document.createElement('div'); c.className='rtab-content'+(i===2?' active':'');
+        c.innerHTML=`<div class="rtab-name ${sign.tone}">${sign.name}</div>
+            <div class="rtab-text">${sign.meaning}</div>`; conEl.appendChild(c);
+    });
+}
+
+function switchRTab(idx) {
+    document.querySelectorAll('.rtab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+    document.querySelectorAll('.rtab-content').forEach((c,i)=>c.classList.toggle('active',i===idx));
+}
+
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+</script>
 </body>
 </html>
