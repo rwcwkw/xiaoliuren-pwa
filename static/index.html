@@ -10,18 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     <style>
         :root {
-            --parchment:   #f2e4c4;
-            --parchment2:  #e8d5a8;
-            --parchment3:  #d4bc88;
-            --ink:         #2c1a0e;
-            --ink-soft:    #5c3d20;
-            --vermillion:  #c0392b;
-            --verm-faint:  rgba(192,57,43,0.12);
-            --seal-red:    #8b1a1a;
-            --gold:        #8b6914;
-            --gold-light:  #b8902a;
+            --parchment:  #f2e4c4;
+            --parchment2: #e8d5a8;
+            --parchment3: #d4bc88;
+            --ink:        #2c1a0e;
+            --ink-soft:   #5c3d20;
+            --vermillion: #c0392b;
+            --gold:       #8b6914;
+            --gold-light: #b8902a;
         }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
@@ -29,36 +26,21 @@
             min-height: 100vh;
             font-family: 'Noto Serif SC', serif;
             color: var(--ink);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; overflow-x: hidden;
         }
-
-        /* Paper grain */
         body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background-image:
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
+            content: ''; position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
             pointer-events: none; z-index: 0;
         }
-
-        /* Vertical ruled lines like manuscript paper */
         body::after {
-            content: '';
-            position: fixed; inset: 0;
-            background-image: repeating-linear-gradient(
-                90deg,
-                transparent,
-                transparent 47px,
-                rgba(139,105,20,0.1) 47px,
-                rgba(139,105,20,0.1) 48px
-            );
+            content: ''; position: fixed; inset: 0;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 47px, rgba(139,105,20,0.1) 47px, rgba(139,105,20,0.1) 48px);
             pointer-events: none; z-index: 0;
         }
 
+        /* ── Page container ── */
         .page {
             position: relative; z-index: 1;
             width: 100%; max-width: 400px;
@@ -66,248 +48,35 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* ── Scroll roller top ── */
+        /* ── Screen switching ── */
+        .screen { display: none; width: 100%; flex-direction: column; align-items: center; }
+        .screen.active { display: flex; }
+
+        /* ── Scroll roller ── */
         .scroll-roller {
-            width: 100%;
-            height: 28px;
+            width: 100%; height: 28px;
             background: linear-gradient(180deg, #5c3d20 0%, #8b6340 40%, #6b4820 100%);
             border-bottom: 3px solid #3a2210;
             position: relative;
             box-shadow: 0 4px 12px rgba(44,26,14,0.35);
         }
-
         .scroll-roller::before, .scroll-roller::after {
-            content: '';
-            position: absolute; top: 50%; transform: translateY(-50%);
+            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
             width: 20px; height: 20px; border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #c8a060, #5c3a18);
             border: 2px solid #3a2210;
         }
         .scroll-roller::before { left: 10px; }
         .scroll-roller::after  { right: 10px; }
-
-        /* ── Header ── */
-        .header {
-            text-align: center;
-            padding: 40px 24px 28px;
-            border-bottom: 1px solid var(--parchment3);
-            width: 100%;
-            position: relative;
-            animation: fadeDown 0.9s ease both;
-        }
-
-
-
-        h1 {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 4rem;
-            color: var(--ink);
-            letter-spacing: 0.4em;
-            padding-right: 0.4em;
-            line-height: 1;
-            text-shadow: 2px 3px 0 rgba(44,26,14,0.15);
-        }
-
-        .header-meta {
-            margin-top: 10px;
-            font-size: 0.68rem;
-            letter-spacing: 0.3em;
-            color: var(--ink-soft);
-            opacity: 0.6;
-        }
-
-        /* ── Brushstroke divider ── */
-        .brush-divider {
-            width: 80%;
-            height: 6px;
-            margin: 0 auto;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 6'%3E%3Cpath d='M0 3 Q20 1 40 3 Q60 5 80 3 Q100 1 120 3 Q140 5 160 3 Q180 1 200 3' stroke='%232c1a0e' stroke-width='1.5' fill='none' opacity='0.35'/%3E%3C/svg%3E") repeat-x center;
-            opacity: 0.5;
-        }
-
-        /* ── Body area ── */
-        .scroll-body {
-            width: 100%;
-            padding: 32px 28px;
-            display: flex; flex-direction: column; align-items: center;
-            gap: 0;
-        }
-
-        /* ── Cast button ── */
-        .btn-wrap { animation: fadeUp 0.8s 0.2s ease both; margin-bottom: 8px; }
-
-        button {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 1.6rem;
-            letter-spacing: 0.4em;
-            padding-right: 0.4em;
-            color: var(--parchment);
-            background: var(--vermillion);
-            border: none;
-            padding: 13px 42px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s ease;
-            box-shadow: 3px 3px 0 var(--ink), 0 6px 20px rgba(192,57,43,0.3);
-        }
-
-        button::before {
-            content: '';
-            position: absolute; inset: -3px;
-            border: 1px solid rgba(139,105,20,0.5);
-            pointer-events: none;
-        }
-
-        button:hover { background: #d44232; transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink), 0 8px 24px rgba(192,57,43,0.4); }
-        button:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
-        button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-
-        /* ── Time ── */
-        .time-display {
-            margin-top: 22px;
-            font-size: 0.82rem;
-            letter-spacing: 0.25em;
-            color: var(--ink-soft);
-            opacity: 0;
-            transition: opacity 0.5s;
-            text-align: center;
-            min-height: 1.3em;
-        }
-        .time-display.visible { opacity: 0.7; }
-
-        /* ── Loading ── */
-        .loading { display: none; flex-direction: column; align-items: center; gap: 18px; margin-top: 44px; }
-        .loading.visible { display: flex; }
-
-        .brush-dots {
-            display: flex; gap: 10px;
-        }
-
-        .brush-dot {
-            width: 10px; height: 10px;
-            background: var(--ink);
-            border-radius: 50% 40% 50% 40%;
-            animation: brushPulse 1.2s ease-in-out infinite;
-            opacity: 0.6;
-        }
-        .brush-dot:nth-child(2) { animation-delay: 0.2s; border-radius: 40% 50% 40% 50%; }
-        .brush-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes brushPulse {
-            0%,100% { transform: scale(1); opacity: 0.6; }
-            50% { transform: scale(0.5); opacity: 0.2; }
-        }
-
-        .loading-text { font-size: 0.75rem; letter-spacing: 0.4em; color: var(--ink-soft); opacity: 0.55; }
-
-        /* ── Error ── */
-        .error-msg { display: none; margin-top: 32px; font-size: 0.82rem; color: var(--vermillion); letter-spacing: 0.1em; text-align: center; padding: 10px 18px; border: 1px solid rgba(192,57,43,0.3); }
-        .error-msg.visible { display: block; }
-
-        /* ── Result ── */
-        .result-panel { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 32px; }
-        .result-panel.visible { display: flex; animation: fadeUp 0.6s ease both; }
-
-        /* ── Result ── */
-        .result-panel { display: none; flex-direction: column; align-items: center; width: 100%; margin-top: 32px; }
-        .result-panel.visible { display: flex; animation: fadeUp 0.6s ease both; }
-
-        /* Column dividers like traditional text columns */
-        .col-section {
-            display: flex;
-            width: 100%;
-            border: 1px solid var(--parchment3);
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .col-section::before {
-            content: '';
-            position: absolute; inset: 4px;
-            border: 1px solid rgba(139,105,20,0.2);
-            pointer-events: none;
-        }
-
-        .col {
-            flex: 1;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 22px 8px 18px;
-            border-right: 1px solid var(--parchment3);
-            position: relative;
-        }
-        .col:last-child { border-right: none; }
-
-        .col-label {
-            font-size: 0.6rem; letter-spacing: 0.3em;
-            color: var(--gold); opacity: 0.7; margin-bottom: 14px;
-        }
-
-        .col-name {
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 2.4rem; line-height: 1;
-            margin-bottom: 10px; letter-spacing: 0.05em;
-        }
-
-        .col-name.auspicious   { color: var(--vermillion); }
-        .col-name.neutral      { color: var(--gold); }
-        .col-name.inauspicious { color: var(--ink-soft); }
-
-        .col-kw { font-size: 0.58rem; color: var(--ink-soft); opacity: 0.55; text-align: center; line-height: 1.8; letter-spacing: 0.08em; }
-
-        /* Reading */
-        .reading-wrap {
-            width: 100%;
-            border: 1px solid var(--parchment3);
-            background: rgba(44,26,14,0.03);
-            padding: 20px 22px 22px;
-            position: relative;
-        }
-
-        .reading-wrap::before {
-            content: '';
-            position: absolute; inset: 5px;
-            border: 1px solid rgba(139,105,20,0.18);
-            pointer-events: none;
-        }
-
-        .reading-heading {
-            display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
-        }
-        .reading-rule { flex: 1; height: 1px; background: var(--parchment3); }
-        .reading-char { font-family: 'Ma Shan Zheng', cursive; font-size: 0.85rem; letter-spacing: 0.3em; color: var(--gold); }
-
-        .reading-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
-
-        .rtab {
-            font-family: 'Ma Shan Zheng', cursive; font-size: 0.8rem; letter-spacing: 0.2em;
-            padding: 5px 14px; border: 1px solid var(--parchment3);
-            background: transparent; cursor: pointer; color: var(--ink-soft); opacity: 0.5;
-            transition: all 0.2s;
-        }
-        .rtab.active { background: var(--vermillion); color: var(--parchment); border-color: var(--vermillion); opacity: 1; }
-
-        .rtab-content { display: none; }
-        .rtab-content.active { display: block; animation: fadeIn 0.3s ease both; }
-
-        .rtab-name { font-family: 'Ma Shan Zheng', cursive; font-size: 1.4rem; letter-spacing: 0.15em; margin-bottom: 8px; }
-        .rtab-name.auspicious   { color: var(--vermillion); }
-        .rtab-name.neutral      { color: var(--gold); }
-        .rtab-name.inauspicious { color: var(--ink-soft); }
-
-        .rtab-text { font-size: 0.78rem; line-height: 2.1; color: var(--ink-soft); letter-spacing: 0.06em; }
-
-        /* ── Scroll roller bottom ── */
         .scroll-roller-bottom {
-            width: 100%;
-            height: 28px;
+            width: 100%; height: 28px;
             background: linear-gradient(0deg, #5c3d20 0%, #8b6340 40%, #6b4820 100%);
             border-top: 3px solid #3a2210;
             box-shadow: 0 -4px 12px rgba(44,26,14,0.35);
             position: relative; margin-top: auto;
         }
         .scroll-roller-bottom::before, .scroll-roller-bottom::after {
-            content: '';
-            position: absolute; top: 50%; transform: translateY(-50%);
+            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
             width: 20px; height: 20px; border-radius: 50%;
             background: radial-gradient(circle at 35% 35%, #c8a060, #5c3a18);
             border: 2px solid #3a2210;
@@ -315,67 +84,498 @@
         .scroll-roller-bottom::before { left: 10px; }
         .scroll-roller-bottom::after  { right: 10px; }
 
-        @keyframes fadeDown { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes fadeUp   { from { opacity:0; transform:translateY(14px); }  to { opacity:1; transform:translateY(0); } }
-        @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+        /* ── Header ── */
+        .header {
+            text-align: center; padding: 40px 24px 28px;
+            border-bottom: 1px solid var(--parchment3);
+            width: 100%; position: relative;
+            animation: fadeDown 0.9s ease both;
+        }
+        h1 {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 4rem; color: var(--ink);
+            letter-spacing: 0.4em; padding-right: 0.4em;
+            line-height: 1; text-shadow: 2px 3px 0 rgba(44,26,14,0.15);
+        }
+        .header-meta {
+            margin-top: 10px; font-size: 0.68rem;
+            letter-spacing: 0.3em; color: var(--ink-soft); opacity: 0.6;
+        }
+
+        /* ── Back button ── */
+        .back-btn {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 0.9rem; letter-spacing: 0.1em;
+            color: var(--gold); opacity: 0.8; padding: 8px;
+            box-shadow: none !important;
+        }
+        .back-btn::before { display: none !important; }
+        .back-btn:hover { opacity: 1; transform: translateY(-50%) translateX(-2px); background: none; box-shadow: none; }
+
+        /* ── Home menu cards ── */
+        .scroll-body {
+            width: 100%; padding: 32px 28px;
+            display: flex; flex-direction: column; align-items: center; gap: 0;
+        }
+
+        .home-intro {
+            text-align: center; padding: 28px 0 32px;
+            font-size: 0.75rem; letter-spacing: 0.3em;
+            color: var(--ink-soft); opacity: 0.65; line-height: 2;
+        }
+
+        .menu-cards {
+            display: flex; flex-direction: column; gap: 16px; width: 100%;
+        }
+
+        .menu-card {
+            width: 100%; padding: 28px 24px;
+            border: 1px solid var(--parchment3);
+            background: rgba(44,26,14,0.02);
+            cursor: pointer; position: relative;
+            transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            animation: fadeUp 0.6s ease both;
+        }
+        .menu-card:nth-child(2) { animation-delay: 0.1s; }
+        .menu-card::before {
+            content: ''; position: absolute; inset: 4px;
+            border: 1px solid rgba(139,105,20,0.2); pointer-events: none;
+        }
+        .menu-card:hover {
+            background: rgba(44,26,14,0.05);
+            border-color: var(--gold-light);
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 12px rgba(44,26,14,0.1);
+        }
+        .menu-card-title {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 2.2rem; color: var(--ink);
+            letter-spacing: 0.3em; line-height: 1;
+            text-shadow: 1px 2px 0 rgba(44,26,14,0.1);
+        }
+        .menu-card-sub {
+            font-size: 0.68rem; letter-spacing: 0.25em;
+            color: var(--gold); opacity: 0.8;
+        }
+        .menu-card-desc {
+            font-size: 0.7rem; letter-spacing: 0.1em;
+            color: var(--ink-soft); opacity: 0.55;
+            text-align: center; line-height: 1.8; margin-top: 4px;
+        }
+        .menu-card-arrow {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            font-size: 0.8rem; color: var(--gold); opacity: 0.5;
+        }
+
+        /* ── Divider ── */
+        .section-divider {
+            display: flex; align-items: center; gap: 12px; width: 100%; margin: 20px 0 16px;
+        }
+        .div-rule { flex: 1; height: 1px; background: var(--parchment3); }
+        .div-char { font-size: 0.65rem; letter-spacing: 0.4em; color: var(--gold); opacity: 0.7; }
+
+        /* ── Buttons ── */
+        button.cast-btn {
+            font-family: 'Ma Shan Zheng', cursive;
+            font-size: 1.6rem; letter-spacing: 0.4em;
+            color: var(--parchment); background: var(--vermillion);
+            border: none; padding: 13px 42px; cursor: pointer;
+            position: relative; transition: all 0.2s ease;
+            box-shadow: 3px 3px 0 var(--ink), 0 6px 20px rgba(192,57,43,0.3);
+        }
+        button.cast-btn::before {
+            content: ''; position: absolute; inset: -3px;
+            border: 1px solid rgba(139,105,20,0.5); pointer-events: none;
+        }
+        button.cast-btn:hover { background: #d44232; transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink), 0 8px 24px rgba(192,57,43,0.4); }
+        button.cast-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+        button.cast-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        /* ── Number inputs ── */
+        .num-inputs {
+            display: flex; gap: 16px; width: 100%; justify-content: center; margin-bottom: 8px;
+        }
+        .num-field {
+            display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1;
+        }
+        .num-label {
+            font-size: 0.68rem; letter-spacing: 0.3em; color: var(--gold); opacity: 0.8;
+        }
+        .num-input {
+            width: 100%; max-width: 120px;
+            font-family: 'Ma Shan Zheng', cursive; font-size: 1.8rem;
+            text-align: center; letter-spacing: 0.1em;
+            background: rgba(44,26,14,0.03);
+            border: 1px solid var(--parchment3);
+            color: var(--ink); padding: 10px 8px;
+            outline: none; transition: border-color 0.2s;
+            -moz-appearance: textfield;
+        }
+        .num-input::-webkit-outer-spin-button,
+        .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .num-input:focus { border-color: var(--gold); }
+        .num-input-hint {
+            font-size: 0.6rem; letter-spacing: 0.15em;
+            color: var(--ink-soft); opacity: 0.45; text-align: center;
+        }
+
+        /* ── Time display ── */
+        .time-display {
+            margin-top: 22px; font-size: 0.82rem; letter-spacing: 0.25em;
+            color: var(--ink-soft); opacity: 0; transition: opacity 0.5s;
+            text-align: center; min-height: 1.3em;
+        }
+        .time-display.visible { opacity: 0.7; }
+
+        /* ── Loading ── */
+        .loading { display: none; flex-direction: column; align-items: center; gap: 18px; margin-top: 44px; }
+        .loading.visible { display: flex; }
+        .brush-dots { display: flex; gap: 10px; }
+        .brush-dot {
+            width: 10px; height: 10px; background: var(--ink);
+            border-radius: 50% 40% 50% 40%;
+            animation: brushPulse 1.2s ease-in-out infinite; opacity: 0.6;
+        }
+        .brush-dot:nth-child(2) { animation-delay: 0.2s; border-radius: 40% 50% 40% 50%; }
+        .brush-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes brushPulse { 0%,100%{transform:scale(1);opacity:0.6;}50%{transform:scale(0.5);opacity:0.2;} }
+        .loading-text { font-size: 0.75rem; letter-spacing: 0.4em; color: var(--ink-soft); opacity: 0.55; }
+
+        /* ── Error ── */
+        .error-msg { display: none; margin-top: 32px; font-size: 0.82rem; color: var(--vermillion); letter-spacing: 0.1em; text-align: center; padding: 10px 18px; border: 1px solid rgba(192,57,43,0.3); }
+        .error-msg.visible { display: block; }
+
+        /* ── Result panel (小六壬) ── */
+        .result-panel { display: none; width: 100%; margin-top: 24px; flex-direction: column; gap: 0; }
+        .result-panel.visible { display: flex; animation: fadeUp 0.5s ease both; }
+        .col-section {
+            display: flex; width: 100%;
+            border: 1px solid var(--parchment3); margin-bottom: 20px; position: relative;
+        }
+        .col-section::before {
+            content: ''; position: absolute; inset: 4px;
+            border: 1px solid rgba(139,105,20,0.2); pointer-events: none;
+        }
+        .col { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 22px 8px 18px; border-right: 1px solid var(--parchment3); }
+        .col:last-child { border-right: none; }
+        .col-label { font-size: 0.6rem; letter-spacing: 0.3em; color: var(--gold); opacity: 0.7; margin-bottom: 14px; }
+        .col-name { font-family: 'Ma Shan Zheng', cursive; font-size: 2.4rem; line-height: 1; margin-bottom: 10px; }
+        .col-name.auspicious   { color: var(--vermillion); }
+        .col-name.neutral      { color: var(--gold); }
+        .col-name.inauspicious { color: var(--ink-soft); }
+        .col-kw { font-size: 0.58rem; color: var(--ink-soft); opacity: 0.55; text-align: center; line-height: 1.8; letter-spacing: 0.08em; }
+        .reading-wrap { width: 100%; border: 1px solid var(--parchment3); background: rgba(44,26,14,0.03); padding: 20px 22px 22px; position: relative; }
+        .reading-wrap::before { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(139,105,20,0.18); pointer-events: none; }
+        .reading-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .reading-rule { flex: 1; height: 1px; background: var(--parchment3); }
+        .reading-char { font-family: 'Ma Shan Zheng', cursive; font-size: 0.85rem; letter-spacing: 0.3em; color: var(--gold); }
+        .reading-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+        .rtab { font-family: 'Ma Shan Zheng', cursive; font-size: 0.8rem; letter-spacing: 0.2em; padding: 5px 14px; border: 1px solid var(--parchment3); background: transparent; cursor: pointer; color: var(--ink-soft); opacity: 0.5; transition: all 0.2s; }
+        .rtab.active { background: var(--vermillion); color: var(--parchment); border-color: var(--vermillion); opacity: 1; }
+        .rtab-content { display: none; }
+        .rtab-content.active { display: block; animation: fadeIn 0.3s ease both; }
+        .rtab-name { font-family: 'Ma Shan Zheng', cursive; font-size: 1.4rem; letter-spacing: 0.15em; margin-bottom: 8px; }
+        .rtab-name.auspicious   { color: var(--vermillion); }
+        .rtab-name.neutral      { color: var(--gold); }
+        .rtab-name.inauspicious { color: var(--ink-soft); }
+        .rtab-text { font-size: 0.78rem; line-height: 2.1; color: var(--ink-soft); letter-spacing: 0.06em; }
+
+        /* ── 梅花易数 result panel ── */
+        .mh-result { display: none; width: 100%; margin-top: 24px; flex-direction: column; gap: 16px; }
+        .mh-result.visible { display: flex; animation: fadeUp 0.5s ease both; }
+
+        .mh-hexagram {
+            width: 100%; display: flex; gap: 0;
+            border: 1px solid var(--parchment3); position: relative;
+        }
+        .mh-hexagram::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(139,105,20,0.2); pointer-events: none; }
+        .mh-gua {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            padding: 18px 8px 14px; border-right: 1px solid var(--parchment3);
+        }
+        .mh-gua:last-child { border-right: none; }
+        .mh-gua-label { font-size: 0.58rem; letter-spacing: 0.3em; color: var(--gold); opacity: 0.7; margin-bottom: 10px; }
+        .mh-gua-name { font-family: 'Ma Shan Zheng', cursive; font-size: 2.2rem; color: var(--ink); line-height: 1; margin-bottom: 6px; }
+        .mh-gua-elem { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--ink-soft); opacity: 0.6; }
+
+        .mh-roles {
+            width: 100%; border: 1px solid var(--parchment3);
+            background: rgba(44,26,14,0.02); position: relative;
+        }
+        .mh-roles::before { content: ''; position: absolute; inset: 4px; border: 1px solid rgba(139,105,20,0.18); pointer-events: none; }
+        .mh-role-row {
+            display: flex; align-items: center; gap: 0;
+            border-bottom: 1px solid var(--parchment3); padding: 14px 16px;
+        }
+        .mh-role-row:last-child { border-bottom: none; }
+        .mh-role-label { font-size: 0.62rem; letter-spacing: 0.25em; color: var(--gold); opacity: 0.7; width: 52px; flex-shrink: 0; }
+        .mh-role-name { font-family: 'Ma Shan Zheng', cursive; font-size: 1.6rem; color: var(--ink); margin-right: 8px; }
+        .mh-role-elem { font-size: 0.68rem; color: var(--ink-soft); opacity: 0.6; letter-spacing: 0.1em; flex: 1; }
+        .mh-outcome {
+            display: flex; align-items: center; gap: 6px; margin-left: auto;
+        }
+        .mh-outcome-tag {
+            font-size: 0.7rem; letter-spacing: 0.15em; padding: 3px 10px;
+            border: 1px solid;
+        }
+        .mh-outcome-tag.auspicious   { color: var(--vermillion); border-color: rgba(192,57,43,0.4); background: rgba(192,57,43,0.05); }
+        .mh-outcome-tag.neutral      { color: var(--gold); border-color: rgba(139,105,20,0.4); background: rgba(139,105,20,0.05); }
+        .mh-outcome-tag.inauspicious { color: var(--ink-soft); border-color: rgba(92,61,32,0.4); background: rgba(92,61,32,0.05); }
+
+        .mh-detail-wrap {
+            width: 100%; border: 1px solid var(--parchment3);
+            background: rgba(44,26,14,0.02); padding: 18px 18px 20px; position: relative;
+        }
+        .mh-detail-wrap::before { content: ''; position: absolute; inset: 5px; border: 1px solid rgba(139,105,20,0.18); pointer-events: none; }
+        .mh-detail-text { font-size: 0.8rem; line-height: 2.1; color: var(--ink-soft); letter-spacing: 0.06em; }
+        .mh-changing-line { font-size: 0.68rem; letter-spacing: 0.2em; color: var(--gold); opacity: 0.75; margin-bottom: 10px; }
+
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeIn   { from{opacity:0;}to{opacity:1;} }
     </style>
 </head>
 <body>
 <div class="page">
-    <div class="scroll-roller"></div>
 
-    <div class="header">
-
-        <h1>小六壬</h1>
-        <div class="header-meta">推步问卦 · 依农历推算</div>
-    </div>
-
-    <div class="scroll-body">
-        <div class="btn-wrap">
-            <button id="castBtn" onclick="run()">起　卦</button>
+    <!-- ══════════════ HOME SCREEN ══════════════ -->
+    <div class="screen active" id="screen-home">
+        <div class="scroll-roller"></div>
+        <div class="header">
+            <h1>易　术</h1>
+            <div class="header-meta">传统占卜 · 千年智慧</div>
         </div>
-
-        <div class="time-display" id="time"></div>
-
-        <div class="loading" id="loading">
-            <div class="brush-dots">
-                <div class="brush-dot"></div>
-                <div class="brush-dot"></div>
-                <div class="brush-dot"></div>
+        <div class="scroll-body">
+            <div class="home-intro">
+                请选择占卜方式<br>
+                <span style="opacity:0.6;font-size:0.65rem">Choose a divination method</span>
             </div>
-            <div class="loading-text">卜筮中</div>
-        </div>
-
-        <div class="error-msg" id="error">⚠ 起卦失败，请稍后再试</div>
-
-        <div class="result-panel" id="result">
-            <div class="col-section" id="cols"></div>
-
-            <div class="reading-wrap">
-                <div class="reading-heading">
-                    <div class="reading-rule"></div>
-                    <span class="reading-char">卦　意</span>
-                    <div class="reading-rule"></div>
+            <div class="menu-cards">
+                <div class="menu-card" onclick="showScreen('screen-xlr')">
+                    <div class="menu-card-title">小六壬</div>
+                    <div class="menu-card-sub">Xiao Liu Ren · 六宫推算</div>
+                    <div class="menu-card-desc">依农历月、日、时辰起卦<br>推算月卦、日卦、时卦</div>
+                    <span class="menu-card-arrow">›</span>
                 </div>
-                <div class="reading-tabs" id="rtabs"></div>
-                <div id="rtab-contents"></div>
+                <div class="menu-card" onclick="showScreen('screen-mh')">
+                    <div class="menu-card-title">梅花易数</div>
+                    <div class="menu-card-sub">Mei Hua Yi Shu · 八卦体用</div>
+                    <div class="menu-card-desc">输入两组数字起卦<br>推算体卦、用卦与变卦</div>
+                    <span class="menu-card-arrow">›</span>
+                </div>
             </div>
         </div>
+        <div class="scroll-roller-bottom"></div>
     </div>
 
-    <div class="scroll-roller-bottom"></div>
-</div>
+    <!-- ══════════════ 小六壬 SCREEN ══════════════ -->
+    <div class="screen" id="screen-xlr">
+        <div class="scroll-roller"></div>
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-home')">‹ 返回</button>
+            <h1>小六壬</h1>
+            <div class="header-meta">推步问卦 · 依农历推算</div>
+        </div>
+        <div class="scroll-body">
+            <div class="btn-wrap">
+                <button class="cast-btn" id="xlrCastBtn" onclick="runXLR()">起　卦</button>
+            </div>
+            <div class="time-display" id="xlr-time"></div>
+            <div class="loading" id="xlr-loading">
+                <div class="brush-dots">
+                    <div class="brush-dot"></div><div class="brush-dot"></div><div class="brush-dot"></div>
+                </div>
+                <div class="loading-text">起卦中</div>
+            </div>
+            <div class="error-msg" id="xlr-error">⚠ 起卦失败，请稍后再试</div>
+            <div class="result-panel" id="xlr-result">
+                <div class="col-section" id="xlr-cols"></div>
+                <div class="reading-wrap">
+                    <div class="reading-heading">
+                        <div class="reading-rule"></div>
+                        <span class="reading-char">卦　意</span>
+                        <div class="reading-rule"></div>
+                    </div>
+                    <div class="reading-tabs" id="xlr-rtabs"></div>
+                    <div id="xlr-rtab-contents"></div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-roller-bottom"></div>
+    </div>
+
+    <!-- ══════════════ 梅花易数 SCREEN ══════════════ -->
+    <div class="screen" id="screen-mh">
+        <div class="scroll-roller"></div>
+        <div class="header">
+            <button class="back-btn" onclick="showScreen('screen-home')">‹ 返回</button>
+            <h1>梅花易数</h1>
+            <div class="header-meta">体用变卦 · 八卦生克</div>
+        </div>
+        <div class="scroll-body">
+
+            <!-- Number inputs -->
+            <div class="section-divider" style="margin-top:8px">
+                <div class="div-rule"></div>
+                <span class="div-char">输入数字</span>
+                <div class="div-rule"></div>
+            </div>
+            <div class="num-inputs">
+                <div class="num-field">
+                    <div class="num-label">数　一</div>
+                    <input class="num-input" id="mh-num1" type="number" min="0" placeholder="如：3" inputmode="numeric"/>
+                    <div class="num-input-hint">上卦取余</div>
+                </div>
+                <div class="num-field">
+                    <div class="num-label">数　二</div>
+                    <input class="num-input" id="mh-num2" type="number" min="0" placeholder="如：5" inputmode="numeric"/>
+                    <div class="num-input-hint">下卦取余</div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                <button class="cast-btn" id="mhCastBtn" onclick="runMH()">起　卦</button>
+            </div>
+
+            <div class="error-msg" id="mh-error">⚠ 请输入两个数字</div>
+
+            <div class="loading" id="mh-loading">
+                <div class="brush-dots">
+                    <div class="brush-dot"></div><div class="brush-dot"></div><div class="brush-dot"></div>
+                </div>
+                <div class="loading-text">推演中</div>
+            </div>
+
+            <!-- 梅花 result -->
+            <div class="mh-result" id="mh-result">
+
+                <!-- Present hexagram -->
+                <div class="section-divider">
+                    <div class="div-rule"></div>
+                    <span class="div-char">本　卦</span>
+                    <div class="div-rule"></div>
+                </div>
+                <div class="mh-hexagram">
+                    <div class="mh-gua">
+                        <div class="mh-gua-label">上　卦</div>
+                        <div class="mh-gua-name" id="mh-upper-name">—</div>
+                        <div class="mh-gua-elem" id="mh-upper-elem"></div>
+                    </div>
+                    <div class="mh-gua">
+                        <div class="mh-gua-label">动　爻</div>
+                        <div class="mh-gua-name" id="mh-changing" style="font-size:1.4rem;color:var(--vermillion)">—</div>
+                        <div class="mh-gua-elem">爻位</div>
+                    </div>
+                    <div class="mh-gua">
+                        <div class="mh-gua-label">下　卦</div>
+                        <div class="mh-gua-name" id="mh-lower-name">—</div>
+                        <div class="mh-gua-elem" id="mh-lower-elem"></div>
+                    </div>
+                </div>
+
+                <!-- Future hexagram -->
+                <div class="section-divider">
+                    <div class="div-rule"></div>
+                    <span class="div-char">变　卦</span>
+                    <div class="div-rule"></div>
+                </div>
+                <div class="mh-hexagram">
+                    <div class="mh-gua">
+                        <div class="mh-gua-label">新上卦</div>
+                        <div class="mh-gua-name" id="mh-new-upper-name">—</div>
+                        <div class="mh-gua-elem" id="mh-new-upper-elem"></div>
+                    </div>
+                    <div class="mh-gua" style="border:none;opacity:0.3">
+                        <div class="mh-gua-label">　</div>
+                        <div class="mh-gua-name">→</div>
+                        <div class="mh-gua-elem"></div>
+                    </div>
+                    <div class="mh-gua">
+                        <div class="mh-gua-label">新下卦</div>
+                        <div class="mh-gua-name" id="mh-new-lower-name">—</div>
+                        <div class="mh-gua-elem" id="mh-new-lower-elem"></div>
+                    </div>
+                </div>
+
+                <!-- Roles: 体/用/变 -->
+                <div class="section-divider">
+                    <div class="div-rule"></div>
+                    <span class="div-char">体用生克</span>
+                    <div class="div-rule"></div>
+                </div>
+                <div class="mh-roles">
+                    <div class="mh-role-row">
+                        <div class="mh-role-label">体　卦</div>
+                        <div class="mh-role-name" id="mh-ti-name">—</div>
+                        <div class="mh-role-elem" id="mh-ti-elem"></div>
+                        <div class="mh-outcome">
+                            <div class="mh-outcome-tag neutral" id="mh-present-outcome-tag">—</div>
+                        </div>
+                    </div>
+                    <div class="mh-role-row">
+                        <div class="mh-role-label">用　卦</div>
+                        <div class="mh-role-name" id="mh-yong-name">—</div>
+                        <div class="mh-role-elem" id="mh-yong-elem"></div>
+                        <div class="mh-outcome" style="opacity:0.4">
+                            <div class="mh-outcome-tag neutral" style="font-size:0.6rem;letter-spacing:0.1em">当下</div>
+                        </div>
+                    </div>
+                    <div class="mh-role-row">
+                        <div class="mh-role-label">变　卦</div>
+                        <div class="mh-role-name" id="mh-bian-name">—</div>
+                        <div class="mh-role-elem" id="mh-bian-elem"></div>
+                        <div class="mh-outcome">
+                            <div class="mh-outcome-tag neutral" id="mh-future-outcome-tag">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail interpretation -->
+                <div class="mh-detail-wrap">
+                    <div class="reading-heading">
+                        <div class="reading-rule"></div>
+                        <span class="reading-char">卦　断</span>
+                        <div class="reading-rule"></div>
+                    </div>
+                    <div class="mh-changing-line" id="mh-changing-line-text"></div>
+                    <div class="mh-detail-text" id="mh-present-detail"></div>
+                    <div style="margin-top:10px">
+                        <div class="mh-detail-text" id="mh-future-detail"></div>
+                    </div>
+                </div>
+
+            </div><!-- /mh-result -->
+        </div>
+        <div class="scroll-roller-bottom"></div>
+    </div>
+
+</div><!-- /page -->
 
 <script>
-const POSITIONS = ["月卦","日卦","时卦"];
-const LABELS = ["月","日","时"];
+// ── Screen navigation ──────────────────────────────
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+}
 
-async function run() {
-    const btn=document.getElementById('castBtn'), loadEl=document.getElementById('loading'),
-          errEl=document.getElementById('error'), resEl=document.getElementById('result'),
-          timeEl=document.getElementById('time');
-    btn.disabled=true; errEl.classList.remove('visible'); resEl.classList.remove('visible');
-    timeEl.classList.remove('visible'); timeEl.textContent=''; loadEl.classList.add('visible');
+// ── 小六壬 ─────────────────────────────────────────
+const XLR_POSITIONS = ["月卦","日卦","时卦"];
+const XLR_LABELS    = ["月","日","时"];
+
+async function runXLR() {
+    const btn=document.getElementById('xlrCastBtn'),
+          loadEl=document.getElementById('xlr-loading'),
+          errEl=document.getElementById('xlr-error'),
+          resEl=document.getElementById('xlr-result'),
+          timeEl=document.getElementById('xlr-time');
+    btn.disabled=true;
+    errEl.classList.remove('visible'); resEl.classList.remove('visible');
+    timeEl.classList.remove('visible'); timeEl.textContent='';
+    loadEl.classList.add('visible');
     try {
         const res=await fetch('/api/xiaoliuren');
         if(!res.ok) throw new Error();
@@ -384,7 +584,8 @@ async function run() {
         loadEl.classList.remove('visible');
         timeEl.textContent=`农历 ${data.lunar_month} 月 ${data.lunar_day} 日　${data.shichen}`;
         timeEl.classList.add('visible');
-        buildCols(data.result); buildRTabs(data.result);
+        buildXLRCols(data.result);
+        buildXLRTabs(data.result);
         resEl.classList.add('visible');
     } catch(e) {
         loadEl.classList.remove('visible');
@@ -393,35 +594,110 @@ async function run() {
     } finally { btn.disabled=false; }
 }
 
-function buildCols(results) {
-    const el=document.getElementById('cols'); el.innerHTML='';
+function buildXLRCols(results) {
+    const el=document.getElementById('xlr-cols'); el.innerHTML='';
     results.forEach((sign,i)=>{
         const c=document.createElement('div'); c.className='col';
-        c.innerHTML=`<div class="col-label">${POSITIONS[i]}</div>
+        c.innerHTML=`<div class="col-label">${XLR_POSITIONS[i]}</div>
             <div class="col-name ${sign.tone}">${sign.name}</div>
             <div class="col-kw">${sign.keywords.replace(/·/g,'<br>')}</div>`;
         el.appendChild(c);
     });
 }
 
-function buildRTabs(results) {
-    const tabsEl=document.getElementById('rtabs'), conEl=document.getElementById('rtab-contents');
+function buildXLRTabs(results) {
+    const tabsEl=document.getElementById('xlr-rtabs'), conEl=document.getElementById('xlr-rtab-contents');
     tabsEl.innerHTML=''; conEl.innerHTML='';
     results.forEach((sign,i)=>{
         const t=document.createElement('button'); t.className='rtab'+(i===2?' active':'');
-        t.textContent=LABELS[i]; t.onclick=()=>switchRTab(i); tabsEl.appendChild(t);
+        t.textContent=XLR_LABELS[i]; t.onclick=()=>switchXLRTab(i); tabsEl.appendChild(t);
         const c=document.createElement('div'); c.className='rtab-content'+(i===2?' active':'');
         c.innerHTML=`<div class="rtab-name ${sign.tone}">${sign.name}</div>
             <div class="rtab-text">${sign.meaning}</div>`; conEl.appendChild(c);
     });
 }
 
-function switchRTab(idx) {
+function switchXLRTab(idx) {
     document.querySelectorAll('.rtab').forEach((t,i)=>t.classList.toggle('active',i===idx));
     document.querySelectorAll('.rtab-content').forEach((c,i)=>c.classList.toggle('active',i===idx));
 }
 
-if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+// ── 梅花易数 ────────────────────────────────────────
+async function runMH() {
+    const n1=document.getElementById('mh-num1').value.trim(),
+          n2=document.getElementById('mh-num2').value.trim();
+    const errEl=document.getElementById('mh-error'),
+          loadEl=document.getElementById('mh-loading'),
+          resEl=document.getElementById('mh-result'),
+          btn=document.getElementById('mhCastBtn');
+
+    errEl.classList.remove('visible');
+    resEl.classList.remove('visible');
+
+    if(n1===''||n2==='') {
+        errEl.textContent='⚠ 请输入两组数字';
+        errEl.classList.add('visible'); return;
+    }
+
+    btn.disabled=true;
+    loadEl.classList.add('visible');
+
+    try {
+        const res=await fetch(`/api/meihua?num1=${encodeURIComponent(n1)}&num2=${encodeURIComponent(n2)}`);
+        if(!res.ok) throw new Error();
+        const d=await res.json();
+        loadEl.classList.remove('visible');
+        fillMHResult(d);
+        resEl.classList.add('visible');
+    } catch(e) {
+        loadEl.classList.remove('visible');
+        errEl.textContent='⚠ 起卦失败，请稍后再试';
+        errEl.classList.add('visible');
+    } finally { btn.disabled=false; }
+}
+
+function fillMHResult(d) {
+    // Present hexagram
+    document.getElementById('mh-upper-name').textContent = d.upper.name;
+    document.getElementById('mh-upper-elem').textContent = d.upper.element + '行';
+    document.getElementById('mh-lower-name').textContent = d.lower.name;
+    document.getElementById('mh-lower-elem').textContent = d.lower.element + '行';
+    document.getElementById('mh-changing').textContent   = '第' + d.changing_line + '爻';
+
+    // Future hexagram
+    document.getElementById('mh-new-upper-name').textContent = d.new_upper.name;
+    document.getElementById('mh-new-upper-elem').textContent = d.new_upper.element + '行';
+    document.getElementById('mh-new-lower-name').textContent = d.new_lower.name;
+    document.getElementById('mh-new-lower-elem').textContent = d.new_lower.element + '行';
+
+    // Roles
+    document.getElementById('mh-ti-name').textContent   = d.ti.name;
+    document.getElementById('mh-ti-elem').textContent   = d.ti.element + '行（体）';
+    document.getElementById('mh-yong-name').textContent = d.yong.name;
+    document.getElementById('mh-yong-elem').textContent = d.yong.element + '行（用）';
+    document.getElementById('mh-bian-name').textContent = d.bian.name;
+    document.getElementById('mh-bian-elem').textContent = d.bian.element + '行（变）';
+
+    // Outcome tags
+    const ptag = document.getElementById('mh-present-outcome-tag');
+    ptag.textContent = d.present_outcome.outcome;
+    ptag.className   = 'mh-outcome-tag ' + d.present_outcome.tone;
+
+    const ftag = document.getElementById('mh-future-outcome-tag');
+    ftag.textContent = d.future_outcome.outcome;
+    ftag.className   = 'mh-outcome-tag ' + d.future_outcome.tone;
+
+    // Detail
+    document.getElementById('mh-changing-line-text').textContent =
+        `动爻：第 ${d.changing_line} 爻`;
+    document.getElementById('mh-present-detail').textContent =
+        '【当下】' + d.present_outcome.detail;
+    document.getElementById('mh-future-detail').textContent =
+        '【未来】' + d.future_outcome.detail;
+}
+
+if('serviceWorker' in navigator)
+    window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 </script>
 </body>
 </html>
