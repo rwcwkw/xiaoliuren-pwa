@@ -136,7 +136,7 @@ def MeiHuaYiShu(num1: int, num2: int):
 
     # Changing line (1-indexed from top, so index = 6 - changing_line)
     changing_line = (num1 + num2) % 6   # 0 = line 6 (bottom)
-    change_idx    = 5 - changing_line   # array index
+    change_idx    = 6 - changing_line   # array index
 
     # Future hexagram — flip the changing line
     future = combined[:]
