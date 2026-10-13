@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xiaoliuren-v3';
+const CACHE_NAME = 'xiaoliuren-v4';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
