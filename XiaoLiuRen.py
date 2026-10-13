@@ -124,19 +124,14 @@ def _five_elements(e1, e2):
                 "detail": f"{e2}克{e1}，体卦受用卦所克，受制于人，大凶。"}
     return {"relation": "无明显生克", "outcome": "平", "tone": "neutral", "detail": "无明显生克关系。"}
 
-def MeiHuaYiShu(num1: int, num2: int):
-    # Upper and lower trigrams of the present hexagram
-    upper_key = num1 % 8
-    lower_key = num2 % 8
+def _meihua_core(upper_key, lower_key, change_key):
     upper = BAGUA[upper_key]
     lower = BAGUA[lower_key]
-
     # Combine into 6-line hexagram (upper first)
     combined = upper["lines"] + lower["lines"]
-
-    # Changing line (1-indexed from top, so index = 6 - changing_line)
-    changing_line = (num1 + num2) % 6   # 0 = line 6 (bottom)
-    change_idx    = 6 - changing_line   # array index
+    change_idx = 6 - change_key  # array index
+    if change_idx == 0:
+        change_idx += 6
 
     # Future hexagram — flip the changing line
     future = combined[:]
@@ -150,30 +145,52 @@ def MeiHuaYiShu(num1: int, num2: int):
     # The trigram that did NOT change is the 体卦
     upper_changed = (tuple(upper["lines"]) != new_upper_lines)
     if upper_changed:
-        ti  = lower        # 体卦 = lower (unchanged)
-        yong = upper       # 用卦 = upper (changed)
-        bian = new_upper   # 变卦 = new upper
+        ti = lower  # 体卦 = lower (unchanged)
+        yong = upper  # 用卦 = upper (changed)
+        bian = new_upper  # 变卦 = new upper
     else:
-        ti   = upper
+        ti = upper
         yong = lower
         bian = new_lower
 
     present_outcome = _five_elements(ti["element"], yong["element"])
-    future_outcome  = _five_elements(ti["element"], bian["element"])
+    future_outcome = _five_elements(ti["element"], bian["element"])
 
     return {
         # Present hexagram
-        "upper":       {"name": upper["name"],    "element": upper["element"]},
-        "lower":       {"name": lower["name"],    "element": lower["element"]},
-        "changing_line": changing_line + 1,        # 1-indexed for display
+        "upper": {"name": upper["name"], "element": upper["element"]},
+        "lower": {"name": lower["name"], "element": lower["element"]},
+        "changing_line": change_key + 1,  # 1-indexed for display
         # Future hexagram
-        "new_upper":   {"name": new_upper["name"],"element": new_upper["element"]},
-        "new_lower":   {"name": new_lower["name"],"element": new_lower["element"]},
+        "new_upper": {"name": new_upper["name"], "element": new_upper["element"]},
+        "new_lower": {"name": new_lower["name"], "element": new_lower["element"]},
         # Roles
-        "ti":          {"name": ti["name"],   "element": ti["element"]},
-        "yong":        {"name": yong["name"], "element": yong["element"]},
-        "bian":        {"name": bian["name"], "element": bian["element"]},
+        "ti": {"name": ti["name"], "element": ti["element"]},
+        "yong": {"name": yong["name"], "element": yong["element"]},
+        "bian": {"name": bian["name"], "element": bian["element"]},
         # Outcomes
         "present_outcome": present_outcome,
-        "future_outcome":  future_outcome,
+        "future_outcome": future_outcome,
     }
+
+def MeiHuaYiShu_number(num1: int, num2: int):
+    # Upper and lower trigrams of the present hexagram
+    upper_key = num1 % 8
+    lower_key = num2 % 8
+
+    # Changing line (1-indexed from top, so index = 6 - changing_line)
+    change_key = (num1 + num2) % 6   # 0 = line 6 (bottom)
+    return _meihua_core(upper_key, lower_key, change_key)
+
+def MeiHuaYiShu_time():
+    # get the timestamp
+    now = pd.to_datetime('today')
+    lunar_date = LunarDate.from_solar_date(now.year, now.month, now.day)
+    # lunar_date, lunar_hour, ShiChen = convert_lunar_time()
+
+    lunardate_sum = lunar_date.year + lunar_date.month + lunar_date.day
+    upper_key = lunardate_sum%8
+    lower_key = (lunardate_sum+lunar_hour)%8
+    change_key = (lunardate_sum+lunar_hour)%6
+
+    return _meihua_core(upper_key, lower_key, change_key)
